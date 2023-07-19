@@ -4,11 +4,6 @@ import numpy as np
 body_cascade = cv.CascadeClassifier(r'C:\Users\Albert\Documents\opencv\sources\data\haarcascades\haarcascade_fullbody.xml')
 face_cascade = cv.CascadeClassifier(r'C:\Users\Albert\Documents\opencv\sources\data\haarcascades\haarcascade_frontalface_alt.xml')
 
-class joint:
-    def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
-
 """
 def findjoint_Tracking(frame):
     artic = body_cascade.detectMultiScale(frame)
