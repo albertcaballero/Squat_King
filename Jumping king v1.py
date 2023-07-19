@@ -51,6 +51,7 @@ cv.destroyAllWindows()
 
 
 """
-- explore other kinds of cascades (fullbody is a bit meh)
+- explore other kinds of cascades (fullbody is dog water)
+    - maybe train my own model/cascade???
 - see if we can increase the threshold for detection and limit the number of detections (so it only detects 1 body and not random shit)
 """
