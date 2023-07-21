@@ -2,18 +2,16 @@ import cv2 as cv
 import numpy as np
 import mediapipe as mp
 
-body_cascade = cv.CascadeClassifier(r'C:\Users\Albert\Documents\opencv\sources\data\haarcascades\haarcascade_fullbody.xml')
-face_cascade = cv.CascadeClassifier(r'C:\Users\Albert\Documents\opencv\sources\data\haarcascades\haarcascade_frontalface_alt.xml')
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
+def getlandmarks(results):
+    LmouthY = results.pose_landmarks.landmark[9].y
+    LmouthX = results.pose_landmarks.landmark[9].x
+    LhipY = results.pose_landmarks.landmark[23].y
+    LhipX = results.pose_landmarks.landmark[23].x
+    return LmouthY, LmouthX, LhipY, LhipX
 
-def getwinsize(capture):
-    width = capture.get(cv.CAP_PROP_FRAME_WIDTH)
-    height = capture.get(cv.CAP_PROP_FRAME_HEIGHT)
-    fps = capture.get(cv.CAP_PROP_FPS)
-    print(f"W = {width} \nH = {height} \nfps = {fps}")
-    return width, height
 
 def squatinput(frame, results):
     random = 1
@@ -24,25 +22,33 @@ def armsimput(frame, results):
 def settings():
     random = 1
 
+def normalize_num(landmarkY, landmarkX):
+    landmarkY = landmarkY * 100
+    landmarkY = int(landmarkY)
+    landmarkX = landmarkX * 100
+    landmarkX = int(landmarkX)
+    return landmarkY, landmarkX
+
 capture = cv.VideoCapture(0)
 if not capture.isOpened():
     print("Cannot open camera")
     exit()
-width, height = getwinsize(capture)
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while True:
         ret, frame = capture.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             break
+        win_height, win_width, c = frame.shape
         grayframe = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     #    frame.flags.writeable = False #makes frame non editable (readonly), should improve performance
         results = pose.process(frame)
-        face = face_cascade.detectMultiScale(grayframe)
-        for (x, y, width, height) in face:
-            cv.rectangle(frame, (x, y), (x + width, y + height), (0,255,0), 2)
-            cv.line(frame, (x + width//2,y + height), (x + width//2,480), (0,255,0), thickness=1)
         mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        if (results.pose_landmarks):
+            LmouthY, LmouthX, LhipY, LhipX = getlandmarks(results)
+        #    cv.line(frame, (x + width//2,y + height), (x + width//2,480), (0,255,0), thickness=1)
+            cv.circle(frame, (int(LhipX*win_width),int(LhipY*win_height)), 8, (255, 44, 23), -1) #just a test, delete
+            cv.circle(frame, (int(LmouthX*win_width),int(LmouthY*win_height)), 8, (255, 255, 23), -1) #just a test, delete
         cv.imshow('frame', frame)
         if cv.waitKey(1) == ord('q'):
             break
