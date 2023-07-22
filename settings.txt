@@ -1,11 +1,12 @@
 armsY_threshold = 0.2
 squatY_threshold = 0.2
-difficulty = Easy
-camera = on
+difficulty = 1
+camera = 1
 
 
 -----------
 DEFAULTS
 armsY_threshold = 0.2
 squatY_threshold = 0.2
-difficulty = Easy
+difficulty = 1
+camera = 1

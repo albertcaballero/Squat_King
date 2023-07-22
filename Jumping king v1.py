@@ -6,43 +6,50 @@ import tkinter as tk
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 wsh = kb.Dispatch("WScript.Shell")
-
-def getlandmarks(results):
-    LmouthY = results.pose_landmarks.landmark[9].y
-    LmouthX = results.pose_landmarks.landmark[9].x
-    LhipY = results.pose_landmarks.landmark[23].y
-    LhipX = results.pose_landmarks.landmark[23].x
-    return LmouthY, LmouthX, LhipY, LhipX
-
-
-def squatinput(frame, results):
-    random = 1
+armsY_threshold = 0.2
+squatY_threshold = 0.05
+difficulty = 1
 
 def settings():
     settings_win = tk.Toplevel()
     settings_win.geometry ("400x400")
     settings_win.title("Settings")
     tk.Label(settings_win, text="Edit your settings").pack()
-    settings_file = open(r"settings.txt", 'r')
+    settings_file = open("settings.txt", 'r')
+    global armsY_threshold
+    global squatY_threshold
+    global difficulty 
+    global camera
+
+    armsY_threshold = 0.2
+    settings_file.close
+
+def squatinput(frame, results, win_width, win_height):
+    #getting hips and knees
+    Lhip = results.pose_landmarks.landmark[23]
+    Rhip = results.pose_landmarks.landmark[24]
+    Lknee = results.pose_landmarks.landmark[25]
+    Rknee = results.pose_landmarks.landmark[26]
+
+    #calculating input
+    if (abs(Lhip.y-Lknee.y) < squatY_threshold*difficulty and abs(Rhip.y-Rknee.y) < squatY_threshold*difficulty):
+        wsh.SendKeys(" ")
+    
 
 def armsinput(frame, results, win_width, win_height):
-    armsY_threshold = 0.2 #this value should be changed in settings, depends on how far away you are from camera
     #getting midpoint
-    NoseY = results.pose_landmarks.landmark[0].y
-    NoseX = results.pose_landmarks.landmark[0].x
-    cv.line(frame, (int(NoseX*win_width), int(NoseY*win_height)), (int(NoseX*win_width), win_height), (0, 0, 255))
+    nose = results.pose_landmarks.landmark[0]
+    cv.line(frame, (int(nose.x*win_width), int(nose.y*win_height)), (int(nose.x*win_width), win_height), (0, 0, 255))
 
     #getting wrists
-    LwristX = results.pose_landmarks.landmark[15].x
-    LwristY = results.pose_landmarks.landmark[15].y
-    RwristX = results.pose_landmarks.landmark[16].x
-    RwristY = results.pose_landmarks.landmark[16].y
+    Lwrist = results.pose_landmarks.landmark[15]
+    Rwrist = results.pose_landmarks.landmark[16]
     
     #calculate keystroke
-    if ((LwristX > NoseX) and (RwristX > NoseX) and abs(RwristY - LwristY) < armsY_threshold):
-        wsh.SendKeys("L")
-    elif ((LwristX < NoseX) and (RwristX < NoseX) and abs(RwristY - LwristY) < armsY_threshold):
-        wsh.SendKeys("R")
+    if ((Lwrist.x > nose.x) and (Rwrist.x > nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_threshold):
+        wsh.SendKeys("{LEFT}")
+    elif ((Lwrist.x < nose.x) and (Rwrist.x < nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_threshold):
+        wsh.SendKeys("{RIGHT}")
 
 def capturing():
     capture = cv.VideoCapture(0)
@@ -60,9 +67,8 @@ def capturing():
             results = pose.process(frame)
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
             if (results.pose_landmarks):
-                LmouthY, LmouthX, LhipY, LhipX = getlandmarks(results)
-                if cv.waitKey(1) == ord('i'): #JUST TO PREVENT RANDOM INPUTS WHILE TESTING, DELETE
-                    armsinput(frame, results, win_width, win_height)
+                squatinput(frame, results, win_width, win_height)
+                armsinput(frame, results, win_width, win_height)
             cv.imshow('frame', frame)
             if cv.waitKey(1) == ord('q'):
                 break
@@ -75,7 +81,7 @@ window.title("Squat King")
 start_btn = tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=70)
 settings_btn = tk.Button(window, text="Settings", height=5, width=10, command=settings).pack(pady = 10)
 
-credits = tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
+credits = tk.Label(window, text="Created by Albert Caballero ;)").pack(side="bottom")
 window.mainloop()
 
 """
@@ -87,4 +93,5 @@ window.mainloop()
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
     - if not the whole body is detected, pause automatically (whole body is from head to knees)
     - some input to cancel jump ???? -> i dont think it's possible tho
+- Maybe im smoking high stuff but keyboard press for 4ms, maybe that's the solution or maybe 10ms idk
 """
