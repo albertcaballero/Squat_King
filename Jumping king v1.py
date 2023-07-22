@@ -1,9 +1,11 @@
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
+import win32com.client as kb
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
+wsh = kb.Dispatch("WScript.Shell")
 
 def getlandmarks(results):
     LmouthY = results.pose_landmarks.landmark[9].y
@@ -16,8 +18,19 @@ def getlandmarks(results):
 def squatinput(frame, results):
     random = 1
 
-def armsimput(frame, results):
-    random = 1
+
+def armsinput(frame, results, win_width, win_height):
+    #getting middle
+    NoseY = results.pose_landmarks.landmark[0].y
+    NoseX = results.pose_landmarks.landmark[0].x
+    cv.line(frame, (int(NoseX*win_width), int(NoseY*win_height)), (int(NoseX*win_width), win_height), (0, 0, 255))
+    LwristX = results.pose_landmarks.landmark[15].x
+    RwristX = results.pose_landmarks.landmark[16].x
+    if ((LwristX > NoseX) and (RwristX > NoseX)):
+        wsh.SendKeys("L")
+    elif ((LwristX < NoseX) and (RwristX < NoseX)):
+        wsh.SendKeys("R")
+
 
 def settings():
     random = 1
@@ -46,9 +59,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
         if (results.pose_landmarks):
             LmouthY, LmouthX, LhipY, LhipX = getlandmarks(results)
-        #    cv.line(frame, (x + width//2,y + height), (x + width//2,480), (0,255,0), thickness=1)
             cv.circle(frame, (int(LhipX*win_width),int(LhipY*win_height)), 8, (255, 44, 23), -1) #just a test, delete
-            cv.circle(frame, (int(LmouthX*win_width),int(LmouthY*win_height)), 8, (255, 255, 23), -1) #just a test, delete
+        #    cv.circle(frame, (int(LmouthX*win_width),int(LmouthY*win_height)), 8, (255, 255, 23), -1) #just a test, delete
+            armsinput(frame, results, win_width, win_height)
         cv.imshow('frame', frame)
         if cv.waitKey(1) == ord('q'):
             break
