@@ -1,7 +1,7 @@
 import cv2 as cv
-import numpy as np
 import mediapipe as mp
 import win32com.client as kb
+import tkinter as tk
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -18,6 +18,8 @@ def getlandmarks(results):
 def squatinput(frame, results):
     random = 1
 
+def settings():
+    settings_file = open(r"settings.txt", 'r')
 
 def armsinput(frame, results, win_width, win_height):
     armsY_threshold = 0.2 #this value should be changed in settings, depends on how far away you are from camera
@@ -38,10 +40,9 @@ def armsinput(frame, results, win_width, win_height):
     elif ((LwristX < NoseX) and (RwristX < NoseX) and abs(RwristY - LwristY) < armsY_threshold):
         wsh.SendKeys("R")
 
-
-def settings():
-    random = 1
-
+#window = tk.Tk()
+#window.geometry("640x180")
+#label = tk.button(window, text="holaaaa")
 capture = cv.VideoCapture(0)
 if not capture.isOpened():
     print("Cannot open camera")
@@ -70,6 +71,7 @@ cv.destroyAllWindows()
 
 """
 - Creating window
+- settings should be stored in a read&write text file (search fd/read/write equivalents in python)
 - Settings (desplegables, sliders, buttons)
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
 - FAILSAFES
