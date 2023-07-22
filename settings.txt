@@ -1,7 +1,7 @@
 armsY_threshold = 0.2
 squatY_threshold = 0.2
 difficulty = Easy
-
+camera = on
 
 
 -----------

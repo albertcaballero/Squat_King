@@ -19,6 +19,10 @@ def squatinput(frame, results):
     random = 1
 
 def settings():
+    settings_win = tk.Toplevel()
+    settings_win.geometry ("400x400")
+    settings_win.title("Settings")
+    tk.Label(settings_win, text="Edit your settings").pack()
     settings_file = open(r"settings.txt", 'r')
 
 def armsinput(frame, results, win_width, win_height):
@@ -40,34 +44,39 @@ def armsinput(frame, results, win_width, win_height):
     elif ((LwristX < NoseX) and (RwristX < NoseX) and abs(RwristY - LwristY) < armsY_threshold):
         wsh.SendKeys("R")
 
-#window = tk.Tk()
-#window.geometry("640x180")
-#label = tk.button(window, text="holaaaa")
-capture = cv.VideoCapture(0)
-if not capture.isOpened():
-    print("Cannot open camera")
-    exit()
-with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-    while True:
-        ret, frame = capture.read()
-        if not ret:
-            print("Can't receive frame (stream end?). Exiting ...")
-            break
-        win_height, win_width, c = frame.shape
-    #    frame.flags.writeable = False #makes frame non editable (readonly), should improve performance
-        results = pose.process(frame)
-        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        if (results.pose_landmarks):
-            LmouthY, LmouthX, LhipY, LhipX = getlandmarks(results)
-            cv.circle(frame, (int(LhipX*win_width),int(LhipY*win_height)), 8, (255, 44, 23), -1) #just a test, delete
-            armsinput(frame, results, win_width, win_height)
-        cv.imshow('frame', frame)
-        if cv.waitKey(1) == ord('q'):
-            break
+def capturing():
+    capture = cv.VideoCapture(0)
+    if not capture.isOpened():
+            print("Cannot open camera")
+            exit()
+    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+        while True:
+            ret, frame = capture.read()
+            if not ret:
+                print("Can't receive frame (stream end?). Exiting ...")
+                break
+            win_height, win_width, c = frame.shape
+        #    frame.flags.writeable = False #makes frame non editable (readonly), should improve performance
+            results = pose.process(frame)
+            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            if (results.pose_landmarks):
+                LmouthY, LmouthX, LhipY, LhipX = getlandmarks(results)
+                if cv.waitKey(1) == ord('i'): #JUST TO PREVENT RANDOM INPUTS WHILE TESTING, DELETE
+                    armsinput(frame, results, win_width, win_height)
+            cv.imshow('frame', frame)
+            if cv.waitKey(1) == ord('q'):
+                break
+    capture.release()
+    cv.destroyAllWindows()
 
-capture.release()
-cv.destroyAllWindows()
+window = tk.Tk()
+window.geometry("400x400")
+window.title("Squat King")
+start_btn = tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=70)
+settings_btn = tk.Button(window, text="Settings", height=5, width=10, command=settings).pack(pady = 10)
 
+credits = tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
+window.mainloop()
 
 """
 - Creating window
