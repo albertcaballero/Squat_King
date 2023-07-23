@@ -1,11 +1,12 @@
 import cv2 as cv
 import mediapipe as mp
-import win32com.client as kb
+import win32com.client
 import tkinter as tk
+import keyboard as kb
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
-wsh = kb.Dispatch("WScript.Shell")
+wsh = win32com.client.Dispatch("WScript.Shell")
 armsY_threshold = 0.2
 squatY_threshold = 0.05
 difficulty = 1
@@ -36,7 +37,7 @@ def squatinput(frame, results, win_width, win_height):
 
     #calculating input
     if (abs(Lhip.y-Lknee.y) < squatY_threshold*difficulty and abs(Rhip.y-Rknee.y) < squatY_threshold*difficulty):
-        wsh.SendKeys(" ")
+        kb.press_and_release('space')
     
 
 def armsinput(frame, results, win_width, win_height):
@@ -50,9 +51,9 @@ def armsinput(frame, results, win_width, win_height):
     
     #calculate keystroke
     if ((Lwrist.x > nose.x) and (Rwrist.x > nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_threshold):
-        wsh.SendKeys("{LEFT}")
+        kb.press_and_release('right')
     elif ((Lwrist.x < nose.x) and (Rwrist.x < nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_threshold):
-        wsh.SendKeys("{RIGHT}")
+        kb.press_and_release('left')
 
 def capturing():
     capture = cv.VideoCapture(0)
@@ -88,7 +89,6 @@ credits = tk.Label(window, text="Created by Albert Caballero ;)").pack(side="bot
 window.mainloop()
 
 """
-- Creating window
 - settings should be stored in a read&write text file (search fd/read/write equivalents in python)
 - Settings (desplegables, sliders, buttons)
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
@@ -97,4 +97,6 @@ window.mainloop()
     - if not the whole body is detected, pause automatically (whole body is from head to knees)
     - some input to cancel jump ???? -> i dont think it's possible tho
 - Maybe im smoking high stuff but keyboard press for 4ms, maybe that's the solution or maybe 10ms idk
+    - even tho it's the solution, this would pause the program for that much time
+    - could be solved with multithreading/multiprocessing but no f idea
 """
