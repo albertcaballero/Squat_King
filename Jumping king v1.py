@@ -24,6 +24,9 @@ def settings():
     armsY_threshold = 0.2
     settings_file.close
 
+def default_settings():
+    random=1
+
 def squatinput(frame, results, win_width, win_height):
     #getting hips and knees
     Lhip = results.pose_landmarks.landmark[23]
