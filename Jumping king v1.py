@@ -1,31 +1,35 @@
 import cv2 as cv
 import mediapipe as mp
-import win32com.client
 import tkinter as tk
 import keyboard as kb
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
-wsh = win32com.client.Dispatch("WScript.Shell")
-armsY_threshold = 0.2
-squatY_threshold = 0.05
-difficulty = 1
-is_jump = 0
-is_arms = 0 #0 no input, 1 left, 2 right
+
+#get settings
+settings = open("settings.txt", "r")
+settings.seek(0)
+armsY_threshold = float(settings.readline(4))
+squatY_threshold = float(settings.readline(4))
+difficulty = int(settings.readline(1))
+camera = int(settings.readline(1))
+detection_conf = float(settings.readline(3))
+tracking_conf = float(settings.readline(3))
+win_height = int(settings.readline(3))
+win_width = int(settings.readline(3))
+settings.close
 
 def settings():
+    global armsY_threshold, squatY_threshold, difficulty, camera, detection_conf, tracking_conf, win_height, win_width
     settings_win = tk.Toplevel()
     settings_win.geometry ("400x400")
     settings_win.title("Settings")
     tk.Label(settings_win, text="Edit your settings").pack()
-    settings_file = open("settings.txt", 'r')
-    global armsY_threshold
-    global squatY_threshold
-    global difficulty 
-    global camera
-
-    armsY_threshold = 0.2
-    settings_file.close
+    defaults_btn = tk.Button(settings_win, text="Reset to defaults", height=2, width=15, command=default_settings).pack(side="bottom")
+    settings = open("settings.txt", 'r')
+    newsettings = settings.readline()
+    s1 = tk.Scale(settings_win, from_=1, to=99, orient="horizontal").pack(pady=10)
+    settings.close
 
 def default_settings():
     random=1
