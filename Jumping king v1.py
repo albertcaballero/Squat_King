@@ -113,7 +113,4 @@ window.mainloop()
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
     - if not the whole body is detected, pause automatically (whole body is from head to knees)
     - some input to cancel jump ???? -> i dont think it's possible tho
-- Maybe im smoking high stuff but keyboard press for 4ms, maybe that's the solution or maybe 10ms idk
-    - even tho it's the solution, this would pause the program for that much time
-    - could be solved with multithreading/multiprocessing but no f idea
 """
