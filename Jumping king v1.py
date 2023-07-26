@@ -19,7 +19,7 @@ win_height = int(settings.readline(3))
 win_width = int(settings.readline(3))
 settings.close
 
-def settings():
+def change_settings():
     global armsY_threshold, squatY_threshold, difficulty, camera, detection_conf, tracking_conf, win_height, win_width
     settings_win = tk.Toplevel()
     settings_win.geometry ("400x400")
@@ -28,7 +28,14 @@ def settings():
     defaults_btn = tk.Button(settings_win, text="Reset to defaults", height=2, width=15, command=default_settings).pack(side="bottom")
     settings = open("settings.txt", 'r')
     newsettings = settings.readline()
-    s1 = tk.Scale(settings_win, from_=1, to=99, orient="horizontal").pack(pady=10)
+    AYT = tk.Scale(settings_win, from_=1, to=99, length=200, orient="horizontal")
+    AYT.pack(pady=10)
+    AYT.set(armsY_threshold*100)
+    armsY_threshold = float(AYT.get()/100)
+    SYT = tk.Scale(settings_win, from_=1, to=99, length=200, orient="horizontal")
+    SYT.pack(pady=10)
+    SYT.set(squatY_threshold*100)
+    squatY_threshold = float(SYT.get()/100)
     settings.close
 
 def default_settings():
@@ -104,7 +111,7 @@ window = tk.Tk()
 window.geometry("400x400")
 window.title("Squat King")
 start_btn = tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=70)
-settings_btn = tk.Button(window, text="Settings", height=5, width=10, command=settings).pack(pady = 10)
+settings_btn = tk.Button(window, text="Settings", height=5, width=10, command=change_settings).pack(pady = 10)
 
 credits = tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 window.mainloop()
