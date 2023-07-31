@@ -9,37 +9,54 @@ mp_pose = mp.solutions.pose
 #get settings
 settings = open("settings.txt", "r")
 settings.seek(0)
-armsY_threshold = float(settings.readline(4))
-squatY_threshold = float(settings.readline(4))
+armsY_threshold = float(settings.readline(3))
+squatY_threshold = float(settings.readline(3))
 difficulty = int(settings.readline(1))
 camera = int(settings.readline(1))
-detection_conf = float(settings.readline(3))
-tracking_conf = float(settings.readline(3))
-win_height = int(settings.readline(3))
-win_width = int(settings.readline(3))
+#detection_conf = float(settings.readline(3))
+#tracking_conf = float(settings.readline(3))
 settings.close
 
 def change_settings():
-    global armsY_threshold, squatY_threshold, difficulty, camera, detection_conf, tracking_conf, win_height, win_width
+    global armsY_threshold, squatY_threshold, difficulty, camera, detection_conf, tracking_conf
     settings_win = tk.Toplevel()
     settings_win.geometry ("400x400")
     settings_win.title("Settings")
     tk.Label(settings_win, text="Edit your settings").pack()
     defaults_btn = tk.Button(settings_win, text="Reset to defaults", height=2, width=15, command=default_settings).pack(side="bottom")
-    settings = open("settings.txt", 'r')
-    newsettings = settings.readline()
-    AYT = tk.Scale(settings_win, from_=1, to=99, length=200, orient="horizontal")
+    apply_btn = tk.Button(settings_win, text="Apply", height=2, width=15, command=apply_settings)
+    apply_btn.pack(side="bottom")
+    AYT = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
     AYT.pack(pady=10)
-    AYT.set(armsY_threshold*100)
-    armsY_threshold = float(AYT.get()/100)
-    SYT = tk.Scale(settings_win, from_=1, to=99, length=200, orient="horizontal")
+    AYT.set(armsY_threshold*10)
+    armsY_threshold = float(AYT.get()/10)
+    print (float(AYT.get()/10)) #IT DOESN'T LOOP INFINITELY, SO IT GETS THE VALUE FIRST TIME Y YA
+    #USE COMMAND= ON SCALE TO CALL A FUNCTIONS THAT SETS THE VALUE
+    SYT = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
     SYT.pack(pady=10)
-    SYT.set(squatY_threshold*100)
-    squatY_threshold = float(SYT.get()/100)
-    settings.close
+    SYT.set(squatY_threshold*10)
+    squatY_threshold = float(SYT.get()/10)
+    DIF = tk.Scale(settings_win, from_=1, to=3, orient="horizontal")
+    DIF.pack(pady=10)
+    DIF.set(difficulty)
+    difficulty = int(DIF.get())
+    CAM = tk.Scale(settings_win, from_=1, to=2, length=50, orient="horizontal")
+    CAM.pack(pady=10)
+    CAM.set(camera)
+    camera = int(CAM.get())
+    
 
 def default_settings():
     random=1
+
+def apply_settings():
+    global armsY_threshold, squatY_threshold, difficulty, camera
+    settings = open("settings.txt", 'w')
+    settings.seek(0)
+    settings_str = str(armsY_threshold) + str(squatY_threshold) + str(difficulty) + str(camera)
+    print(settings_str)
+    settings.write(settings_str)
+    settings.close
 
 def squatinput(results):
     global is_jump

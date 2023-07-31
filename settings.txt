@@ -1,12 +1,1 @@
-0.200.20110.50.5480640
-
-0.200.20110.50.5640180
-
-0.02 armsY_threshold SLIDER
-0.02 squatY_threshold SLIDER
-1 difficulty DROPDOWN
-1 camera TOGGLE
-0.5 min_detection_confidence SLIDER
-0.5 min_tracking_confidence SLIDER
-480 win_height DROPDOWN
-640 win_width DROPDOWN
+0.20.211
