@@ -31,7 +31,7 @@ def change_settings():
     AYT.set(armsY_threshold*10)
     armsY_threshold = float(AYT.get()/10)
     print (float(AYT.get()/10)) #IT DOESN'T LOOP INFINITELY, SO IT GETS THE VALUE FIRST TIME Y YA
-    #USE COMMAND= ON SCALE TO CALL A FUNCTIONS THAT SETS THE VALUE
+    #USE COMMAND= ON SCALE TO CALL A FUNCTIONS THAT SETS THE VALUE aaa
     SYT = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
     SYT.pack(pady=10)
     SYT.set(squatY_threshold*10)
