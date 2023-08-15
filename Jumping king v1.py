@@ -3,6 +3,7 @@ import mediapipe as mp
 import tkinter as tk
 import keyboard as kb
 import json as js
+from tktooltip import ToolTip
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -20,37 +21,48 @@ with open("settings.json", "r") as settings_r:
 
 def change_settings():
     global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
-    global SYT_scale, DIF_scale, AYT_scale, CAM_scale
+    global SYT_scale, DIF_scale, AYT_scale, CAM_scale, cam_state
+    cam_state = tk.IntVar()
     settings_win = tk.Toplevel()
     settings_win.geometry ("400x400")
     settings_win.title("Settings")
+    settings_win.columnconfigure(index = 1, minsize=100, weight=1)
+    settings_win.columnconfigure(index = 0, minsize=100, weight=1)
     tk.Label(settings_win, text="Edit your settings").grid(row=0, column=1, padx=2, pady=10)
 
     defaults_btn = tk.Button(settings_win, text="Reset to defaults", height=2, width=15, command=default_settings)
-    defaults_btn.grid(row=5, column=0, pady=10, padx=4)
+    defaults_btn.grid(row=5, column=0, pady=25, padx=20)
     apply_btn = tk.Button(settings_win, text="Apply", height=2, width=15, command=apply_settings)
-    apply_btn.grid(row=5, column=1, pady=10, padx=4)
+    apply_btn.grid(row=5, column=1, pady=25, padx=1)
 
     AYT_scale = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
     tk.Label(settings_win, text="Arms vert. distance").grid(row=1, column=0, pady=4, padx=4)
     AYT_scale.grid(row=1, column=1, pady=4, padx=4)
     AYT_scale.set(armsY_thr*10)
+    ToolTip(AYT_scale, delay=1.0, msg="Adjust the threshold for how close the arms need to be (vertically) "
+            "for the input to be detected\n(depends on how far away you are from the camera)")
 
     SYT_scale = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
     tk.Label(settings_win, text="Squat vert. distance").grid(row=2, column=0, pady=4, padx=4)
     SYT_scale.grid(row=2, column=1, pady=4, padx=4)
     SYT_scale.set(squatY_thr*10)
+    ToolTip(SYT_scale, delay=1.0, msg="Adjust the detection threshold for what counts as a squat\n"
+            "(depends on how far away you are from the camera)")
 
     DIF_scale = tk.Scale(settings_win, from_=1, to=3, orient="horizontal")
     tk.Label(settings_win, text="Difficulty").grid(row=3, column=0, pady=4, padx=4)
     DIF_scale.grid(row=3, column=1, pady=4, padx=4)
     DIF_scale.set(difficulty)
+    ToolTip(DIF_scale, delay=1.0, msg="Pretty self explanatory (1 easy, 3 difficult)\n"
+            "Idk, in case you're crazy??\n\n\n\nCrazy? I was crazy once") #they locked me in a room, a rubber room
     
-    CAM_scale = tk.Scale(settings_win, from_=1, to=2, length=50, orient="horizontal")
-    tk.Label(settings_win, text="Camera on-off").grid(row=4, column=0, pady=4, padx=4)
+    cam_state.set(camera)
+    CAM_scale = tk.Checkbutton(settings_win, variable=cam_state)
+    tk.Label(settings_win, text="Camera").grid(row=4, column=0, pady=4, padx=4)
     CAM_scale.grid(row=4, column=1, pady=4, padx=4)
-    CAM_scale.set(camera)
-    
+    ToolTip(CAM_scale, delay=1.0, msg="Toggles wether the camera feedback is shown\n\n"
+            "NOTE: this does not toggle the USE of the camera, just what you see, "
+            "in case you don't wanna see your struggling face")
 
 def default_settings():
     global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
@@ -69,11 +81,11 @@ def default_settings():
 
 def apply_settings():
     global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
-    global SYT_scale, DIF_scale, AYT_scale, CAM_scale
+    global SYT_scale, DIF_scale, AYT_scale, CAM_scale, cam_state
     armsY_thr = float(AYT_scale.get()/10)
     squatY_thr = float(SYT_scale.get()/10)
     difficulty = int(DIF_scale.get())
-    camera = int(CAM_scale.get())
+    camera = cam_state.get()
 
     data['armsY_threshold'] = armsY_thr
     data['squatY_threshold'] = squatY_thr
@@ -152,15 +164,14 @@ def capturing():
 window = tk.Tk()
 window.geometry("400x400")
 window.title("Squat King")
-start_btn = tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=70)
-settings_btn = tk.Button(window, text="Settings", height=5, width=10, command=change_settings).pack(pady = 10)
+tk.Label(window, text="Welcome!").pack(side="top", pady=10)
+tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=50)
+tk.Button(window, text="Settings", height=5, width=10, command=change_settings).pack(pady = 10)
+tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 
-credits = tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 window.mainloop()
 
 """
-- settings should be stored in a read&write text file (search fd/read/write equivalents in python)
-- Settings (desplegables, sliders, buttons)
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
 - FAILSAFES
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
