@@ -2,61 +2,86 @@ import cv2 as cv
 import mediapipe as mp
 import tkinter as tk
 import keyboard as kb
+import json as js
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 #get settings
-settings = open("settings.txt", "r")
-settings.seek(0)
-armsY_threshold = float(settings.readline(3))
-squatY_threshold = float(settings.readline(3))
-difficulty = int(settings.readline(1))
-camera = int(settings.readline(1))
-#detection_conf = float(settings.readline(3))
-#tracking_conf = float(settings.readline(3))
-settings.close
+with open("settings.json", "r") as settings_r:
+    data = js.load(settings_r)
+    armsY_thr = data['armsY_threshold']
+    squatY_thr = data['squatY_threshold']
+    difficulty = data['difficulty']
+    camera = data['camera']
+    #detection_conf = data['min_detection_confidence']
+    #tracking_conf = data['min_tracking_confidence']
+    settings_r.close()
 
 def change_settings():
-    global armsY_threshold, squatY_threshold, difficulty, camera, detection_conf, tracking_conf
+    global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
+    global SYT_scale, DIF_scale, AYT_scale, CAM_scale
     settings_win = tk.Toplevel()
     settings_win.geometry ("400x400")
     settings_win.title("Settings")
-    tk.Label(settings_win, text="Edit your settings").pack()
-    defaults_btn = tk.Button(settings_win, text="Reset to defaults", height=2, width=15, command=default_settings).pack(side="bottom")
+    tk.Label(settings_win, text="Edit your settings").grid(row=0, column=1, padx=2, pady=10)
+
+    defaults_btn = tk.Button(settings_win, text="Reset to defaults", height=2, width=15, command=default_settings)
+    defaults_btn.grid(row=5, column=0, pady=10, padx=4)
     apply_btn = tk.Button(settings_win, text="Apply", height=2, width=15, command=apply_settings)
-    apply_btn.pack(side="bottom")
-    AYT = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
-    AYT.pack(pady=10)
-    AYT.set(armsY_threshold*10)
-    armsY_threshold = float(AYT.get()/10)
-    print (float(AYT.get()/10)) #IT DOESN'T LOOP INFINITELY, SO IT GETS THE VALUE FIRST TIME Y YA
-    #USE COMMAND= ON SCALE TO CALL A FUNCTIONS THAT SETS THE VALUE aaa
-    SYT = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
-    SYT.pack(pady=10)
-    SYT.set(squatY_threshold*10)
-    squatY_threshold = float(SYT.get()/10)
-    DIF = tk.Scale(settings_win, from_=1, to=3, orient="horizontal")
-    DIF.pack(pady=10)
-    DIF.set(difficulty)
-    difficulty = int(DIF.get())
-    CAM = tk.Scale(settings_win, from_=1, to=2, length=50, orient="horizontal")
-    CAM.pack(pady=10)
-    CAM.set(camera)
-    camera = int(CAM.get())
+    apply_btn.grid(row=5, column=1, pady=10, padx=4)
+
+    AYT_scale = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
+    tk.Label(settings_win, text="Arms vert. distance").grid(row=1, column=0, pady=4, padx=4)
+    AYT_scale.grid(row=1, column=1, pady=4, padx=4)
+    AYT_scale.set(armsY_thr*10)
+
+    SYT_scale = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
+    tk.Label(settings_win, text="Squat vert. distance").grid(row=2, column=0, pady=4, padx=4)
+    SYT_scale.grid(row=2, column=1, pady=4, padx=4)
+    SYT_scale.set(squatY_thr*10)
+
+    DIF_scale = tk.Scale(settings_win, from_=1, to=3, orient="horizontal")
+    tk.Label(settings_win, text="Difficulty").grid(row=3, column=0, pady=4, padx=4)
+    DIF_scale.grid(row=3, column=1, pady=4, padx=4)
+    DIF_scale.set(difficulty)
+    
+    CAM_scale = tk.Scale(settings_win, from_=1, to=2, length=50, orient="horizontal")
+    tk.Label(settings_win, text="Camera on-off").grid(row=4, column=0, pady=4, padx=4)
+    CAM_scale.grid(row=4, column=1, pady=4, padx=4)
+    CAM_scale.set(camera)
     
 
 def default_settings():
-    random=1
+    global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
+    armsY_thr = 0.2
+    squatY_thr = 0.2
+    difficulty = 1
+    camera = 1
+
+    data['armsY_threshold'] = 0.2
+    data['squatY_threshold'] = 0.2
+    data['difficulty'] = 1
+    data['camera'] = 1
+    with open("settings.json", "w") as settings_w:
+        js.dump(data, settings_w)
+        settings_w.close
 
 def apply_settings():
-    global armsY_threshold, squatY_threshold, difficulty, camera
-    settings = open("settings.txt", 'w')
-    settings.seek(0)
-    settings_str = str(armsY_threshold) + str(squatY_threshold) + str(difficulty) + str(camera)
-    print(settings_str)
-    settings.write(settings_str)
-    settings.close
+    global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
+    global SYT_scale, DIF_scale, AYT_scale, CAM_scale
+    armsY_thr = float(AYT_scale.get()/10)
+    squatY_thr = float(SYT_scale.get()/10)
+    difficulty = int(DIF_scale.get())
+    camera = int(CAM_scale.get())
+
+    data['armsY_threshold'] = armsY_thr
+    data['squatY_threshold'] = squatY_thr
+    data['difficulty'] = difficulty
+    data['camera'] = camera
+    with open("settings.json", "w") as settings_w:
+        js.dump(data, settings_w)
+        settings_w.close
 
 def squatinput(results):
     global is_jump
@@ -67,10 +92,10 @@ def squatinput(results):
     Rknee = results.pose_landmarks.landmark[26]
 
     #calculating input
-    if (abs(Lhip.y-Lknee.y) < squatY_threshold*difficulty and abs(Rhip.y-Rknee.y) < squatY_threshold*difficulty and is_jump == 0):
+    if (abs(Lhip.y-Lknee.y) < squatY_thr*difficulty and abs(Rhip.y-Rknee.y) < squatY_thr*difficulty and is_jump == 0):
         kb.press('space')
         is_jump = 1
-    elif (abs(Lhip.y-Lknee.y) > squatY_threshold*difficulty and abs(Rhip.y-Rknee.y) > squatY_threshold*difficulty and is_jump == 1):
+    elif (abs(Lhip.y-Lknee.y) > squatY_thr*difficulty and abs(Rhip.y-Rknee.y) > squatY_thr*difficulty and is_jump == 1):
         kb.release('space')
         is_jump = 0
 
@@ -86,10 +111,10 @@ def armsinput(frame, results, win_width, win_height):
     Rwrist = results.pose_landmarks.landmark[16]
     
     #calculate keystroke
-    if ((Lwrist.x > nose.x) and (Rwrist.x > nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_threshold and is_arms != 2):
+    if ((Lwrist.x > nose.x) and (Rwrist.x > nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_thr and is_arms != 2):
         kb.press('left')
         is_arms = 2
-    elif ((Lwrist.x < nose.x) and (Rwrist.x < nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_threshold and is_arms != 1):
+    elif ((Lwrist.x < nose.x) and (Rwrist.x < nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_thr and is_arms != 1):
         kb.press('right')
         is_arms = 1
     elif ((Lwrist.x > nose.x) and (Rwrist.x < nose.x) and is_arms != 0):
