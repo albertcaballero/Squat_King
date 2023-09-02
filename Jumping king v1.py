@@ -7,6 +7,8 @@ from tktooltip import ToolTip
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
+is_jump = 0
+is_arms = 0
 
 #get settings
 with open("settings.json", "r") as settings_r:
@@ -18,6 +20,19 @@ with open("settings.json", "r") as settings_r:
     #detection_conf = data['min_detection_confidence']
     #tracking_conf = data['min_tracking_confidence']
     settings_r.close()
+
+def find_camera_arrays():
+    index = 0
+    arr = []
+    i = 10
+    while i > 0:
+        cap = cv.VideoCapture(index)
+        if cap.read()[0]:
+            arr.append(index)
+            cap.release()
+        index += 1
+        i -= 1
+    return arr
 
 def change_settings():
     global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
@@ -135,7 +150,8 @@ def armsinput(frame, results, win_width, win_height):
         is_arms = 0
 
 def capturing():
-    capture = cv.VideoCapture(0)
+    camera_index = camera_current.get()
+    capture = cv.VideoCapture(camera_index)
     if not capture.isOpened():
             print("Cannot open camera")
             exit()
@@ -165,14 +181,21 @@ window = tk.Tk()
 window.geometry("400x400")
 window.title("Squat King")
 tk.Label(window, text="Welcome!").pack(side="top", pady=10)
-tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=50)
+tk.Label(window, text="select your camera:").pack(pady=20)
+available_cameras = find_camera_arrays()
+camera_current = tk.IntVar()
+camera_current.set(0)
+tk.OptionMenu(window, camera_current, *available_cameras).pack(padx=10)
+tk.Button(window, text="Start", height=5, width=10, command=capturing).pack(pady=20)
 tk.Button(window, text="Settings", height=5, width=10, command=change_settings).pack(pady = 10)
 tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 
 window.mainloop()
 
 """
+- portarse bonito
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
+- show camera setting does literally nothing, in fact, all settings do literally nothing
 - FAILSAFES
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
     - if not the whole body is detected, pause automatically (whole body is from head to knees)
