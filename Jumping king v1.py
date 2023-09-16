@@ -4,6 +4,7 @@ import tkinter as tk
 import keyboard as kb
 import json as js
 from tktooltip import ToolTip
+import numpy as np
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -150,6 +151,7 @@ def armsinput(frame, results, win_width, win_height):
         is_arms = 0
 
 def capturing():
+    global camera
     camera_index = camera_current.get()
     capture = cv.VideoCapture(camera_index)
     if not capture.isOpened():
@@ -162,8 +164,9 @@ def capturing():
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
             win_height, win_width, c = frame.shape
-        #    frame.flags.writeable = False #makes frame non editable (readonly), should improve performance
             results = pose.process(frame)
+            if (camera == 0):
+                cv.rectangle(frame, pt1=(0, 0), pt2=(win_width, win_height), color=(0, 0, 0), thickness=-1)
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
             if (results.pose_landmarks):
                 squatinput(results)
@@ -193,11 +196,14 @@ tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 window.mainloop()
 
 """
-- portarse bonito
+- README on github
+- make it look c00l and M0d3rn!1!1!!
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
-- show camera setting does literally nothing, in fact, all settings do literally nothing
+- Make settings do stuff
+    - ArmsY threshold
+    - Squat Y threshold
+    - Difficulty
 - FAILSAFES
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
     - if not the whole body is detected, pause automatically (whole body is from head to knees)
-    - some input to cancel jump ???? -> i dont think it's possible tho
 """
