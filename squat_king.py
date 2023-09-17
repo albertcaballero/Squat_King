@@ -129,7 +129,7 @@ def squatinput(results):
 
 
 def armsinput(frame, results, win_width, win_height):
-    global is_arms
+    global is_arms, armsY_thr
     #getting midpoint
     nose = results.pose_landmarks.landmark[0]
     cv.line(frame, (int(nose.x*win_width), int(nose.y*win_height)), (int(nose.x*win_width), win_height), (0, 0, 255))
