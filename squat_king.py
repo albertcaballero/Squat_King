@@ -196,13 +196,7 @@ tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 window.mainloop()
 
 """
-- README on github
-- make it look c00l and M0d3rn!1!1!!
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
-- Make settings do stuff
-    - ArmsY threshold
-    - Squat Y threshold
-    - Difficulty
 - FAILSAFES
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
     - if not the whole body is detected, pause automatically (whole body is from head to knees)
