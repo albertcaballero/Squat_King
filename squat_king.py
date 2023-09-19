@@ -4,7 +4,6 @@ import tkinter as tk
 import keyboard as kb
 import json as js
 from tktooltip import ToolTip
-import numpy as np
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -120,10 +119,10 @@ def squatinput(results):
     Rknee = results.pose_landmarks.landmark[26]
 
     #calculating input
-    if (abs(Lhip.y-Lknee.y) < squatY_thr*difficulty and abs(Rhip.y-Rknee.y) < squatY_thr*difficulty and is_jump == 0):
+    if (abs(Lhip.y-Lknee.y) < squatY_thr*(1/difficulty) and abs(Rhip.y-Rknee.y) < squatY_thr*(1/difficulty) and is_jump == 0):
         kb.press('space')
         is_jump = 1
-    elif (abs(Lhip.y-Lknee.y) > squatY_thr*difficulty and abs(Rhip.y-Rknee.y) > squatY_thr*difficulty and is_jump == 1):
+    elif (abs(Lhip.y-Lknee.y) > squatY_thr*(1/difficulty) and abs(Rhip.y-Rknee.y) > squatY_thr*(1/difficulty) and is_jump == 1):
         kb.release('space')
         is_jump = 0
 
@@ -171,11 +170,11 @@ def capturing():
             if (results.pose_landmarks):
                 squatinput(results)
                 armsinput(frame, results, win_width, win_height)
-            cv.imshow('frame', frame)
+            cv.imshow('close with Q or Esc', frame)
             if cv.waitKey(1) == ord('q'):
                 break
     kb.release('space')
-    kb.release('left')
+    kb.release('left') 
     kb.release('right')
     capture.release()
     cv.destroyAllWindows()
@@ -196,6 +195,8 @@ tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 window.mainloop()
 
 """
+- PAUSE BUTTON/pose --> is_paused Boolean, squat_input and arms_input only if false --> touch corner of the window
+- sensitivity setting --> NORMALIZE SENSITIVITY
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
 - FAILSAFES
     - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
