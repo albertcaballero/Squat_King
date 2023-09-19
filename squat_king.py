@@ -172,6 +172,7 @@ def capturing():
     global camera, is_paused
     camera_index = camera_current.get()
     capture = cv.VideoCapture(camera_index)
+    enter_message = 150
     if not capture.isOpened():
             print("Cannot open camera")
             exit()
@@ -187,14 +188,18 @@ def capturing():
                 cv.rectangle(frame, pt1=(0, 0), pt2=(win_width, win_height), color=(0, 0, 0), thickness=-1)
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
             check_pause(results, win_height, win_width)
-            cv.rectangle(frame, pt1=(0,0), pt2=(90, 90), color=(0, 0, 0), thickness=3)
-            cv.putText(frame, text="Pause", org=(15,50), fontFace=cv.QT_FONT_NORMAL, fontScale=0.6, color=(0,0,0), thickness=1)
+            cv.rectangle(frame, pt1=(0,0), pt2=(90, 90), color=(164, 190, 30), thickness=3)
+            cv.putText(frame, text="Pause", org=(15,50), fontFace=cv.FONT_HERSHEY_DUPLEX, fontScale=0.6, color=(164, 190, 30), thickness=1)
             if (is_paused == True):
-                cv.rectangle(frame, pt1=(0,0), pt2=(win_width, win_height), color=(0, 0, 255), thickness=10)
+                cv.rectangle(frame, pt1=(0,0), pt2=(win_width, win_height), color=(102,20,200), thickness=10)
+                cv.putText(frame, text="PAUSED", org=(150,450), fontFace=cv.FONT_HERSHEY_DUPLEX, fontScale=3, color=(102,20,200), thickness=5)
             if (results.pose_landmarks and is_paused == False):
                 squatinput(results)
                 armsinput(frame, results, win_width, win_height)
-            cv.imshow('close with Q', frame)
+            if (enter_message > 0):
+                cv.putText(frame, text="exit with Q", org=(140,320), fontFace=cv.FONT_HERSHEY_TRIPLEX, fontScale=2, color=(149,89,52), thickness=3)
+                enter_message -= 1
+            cv.imshow('Squat King', frame)
             if cv.waitKey(1) == ord('q'):
                 break
     kb.release('space')
