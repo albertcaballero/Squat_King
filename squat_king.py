@@ -9,6 +9,8 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 is_jump = 0
 is_arms = 0
+is_paused = False
+seconds = 0
 
 #get settings
 with open("settings.json", "r") as settings_r:
@@ -149,8 +151,25 @@ def armsinput(frame, results, win_width, win_height):
         kb.release('left')
         is_arms = 0
 
+def check_pause(results, win_height, win_width):
+    global is_paused, seconds
+    if (results.pose_landmarks):
+        Rwrist = results.pose_landmarks.landmark[16]
+    else:
+        return
+    if (results.pose_landmarks and abs(Rwrist.y*win_height) < 90 and abs(Rwrist.x*win_width) < 90):
+        if (is_paused == False and seconds > 10):
+            is_paused = True
+            seconds = 0
+        elif (is_paused == True and seconds > 10):
+            is_paused = False
+            seconds = 0
+        seconds += 1
+    else:
+        seconds = 0
+
 def capturing():
-    global camera
+    global camera, is_paused
     camera_index = camera_current.get()
     capture = cv.VideoCapture(camera_index)
     if not capture.isOpened():
@@ -167,10 +186,15 @@ def capturing():
             if (camera == 0):
                 cv.rectangle(frame, pt1=(0, 0), pt2=(win_width, win_height), color=(0, 0, 0), thickness=-1)
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-            if (results.pose_landmarks):
+            check_pause(results, win_height, win_width)
+            cv.rectangle(frame, pt1=(0,0), pt2=(90, 90), color=(0, 0, 0), thickness=3)
+            cv.putText(frame, text="Pause", org=(15,50), fontFace=cv.QT_FONT_NORMAL, fontScale=0.6, color=(0,0,0), thickness=1)
+            if (is_paused == True):
+                cv.rectangle(frame, pt1=(0,0), pt2=(win_width, win_height), color=(0, 0, 255), thickness=10)
+            if (results.pose_landmarks and is_paused == False):
                 squatinput(results)
                 armsinput(frame, results, win_width, win_height)
-            cv.imshow('close with Q or Esc', frame)
+            cv.imshow('close with Q', frame)
             if cv.waitKey(1) == ord('q'):
                 break
     kb.release('space')
