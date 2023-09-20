@@ -12,12 +12,11 @@ is_arms = 0
 is_paused = False
 seconds = 0
 
-#get settings
 with open("settings.json", "r") as settings_r:
     data = js.load(settings_r)
-    armsY_thr = data['armsY_threshold']
-    squatY_thr = data['squatY_threshold']
-    difficulty = data['difficulty']
+    arms_sens = data['armsY_threshold']
+    squat_sens = data['squatY_threshold']
+    #difficulty = data['difficulty']
     camera = data['camera']
     #detection_conf = data['min_detection_confidence']
     #tracking_conf = data['min_tracking_confidence']
@@ -37,7 +36,7 @@ def find_camera_arrays():
     return arr
 
 def change_settings():
-    global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
+    global arms_sens, squat_sens, camera #detection_conf, tracking_conf, difficulty
     global SYT_scale, DIF_scale, AYT_scale, CAM_scale, cam_state
     cam_state = tk.IntVar()
     settings_win = tk.Toplevel()
@@ -53,25 +52,25 @@ def change_settings():
     apply_btn.grid(row=5, column=1, pady=25, padx=1)
 
     AYT_scale = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
-    tk.Label(settings_win, text="Arms vert. distance").grid(row=1, column=0, pady=4, padx=4)
+    tk.Label(settings_win, text="Arms sensitivity").grid(row=1, column=0, pady=4, padx=4)
     AYT_scale.grid(row=1, column=1, pady=4, padx=4)
-    AYT_scale.set(armsY_thr*10)
+    AYT_scale.set(arms_sens*10)
     ToolTip(AYT_scale, delay=1.0, msg="Adjust the threshold for how close the arms need to be (vertically) "
             "for the input to be detected\n(depends on how far away you are from the camera)")
 
     SYT_scale = tk.Scale(settings_win, from_=1, to=9, length=200, orient="horizontal")
-    tk.Label(settings_win, text="Squat vert. distance").grid(row=2, column=0, pady=4, padx=4)
+    tk.Label(settings_win, text="Squat sensitivity").grid(row=2, column=0, pady=4, padx=4)
     SYT_scale.grid(row=2, column=1, pady=4, padx=4)
-    SYT_scale.set(squatY_thr*10)
-    ToolTip(SYT_scale, delay=1.0, msg="Adjust the detection threshold for what counts as a squat\n"
+    SYT_scale.set(squat_sens*10)
+    ToolTip(SYT_scale, delay=1.0, msg="Adjust the detection threshold (sensitivity) for what counts as a squat\n"
             "(depends on how far away you are from the camera)")
 
-    DIF_scale = tk.Scale(settings_win, from_=1, to=3, orient="horizontal")
-    tk.Label(settings_win, text="Difficulty").grid(row=3, column=0, pady=4, padx=4)
-    DIF_scale.grid(row=3, column=1, pady=4, padx=4)
-    DIF_scale.set(difficulty)
-    ToolTip(DIF_scale, delay=1.0, msg="Pretty self explanatory (1 easy, 3 difficult)\n"
-            "Idk, in case you're crazy??\n\n\n\nCrazy? I was crazy once") #they locked me in a room, a rubber room
+    # DIF_scale = tk.Scale(settings_win, from_=1, to=3, orient="horizontal")
+    # tk.Label(settings_win, text="Difficulty").grid(row=3, column=0, pady=4, padx=4)
+    # DIF_scale.grid(row=3, column=1, pady=4, padx=4)
+    # DIF_scale.set(difficulty)
+    # ToolTip(DIF_scale, delay=1.0, msg="Pretty self explanatory (1 easy, 3 difficult)\n"
+    #         "Idk, in case you're crazy??\n\n\n\nCrazy? I was crazy once") #they locked me in a room, a rubber room
     
     cam_state.set(camera)
     CAM_scale = tk.Checkbutton(settings_win, variable=cam_state)
@@ -82,68 +81,65 @@ def change_settings():
             "in case you don't wanna see your struggling face")
 
 def default_settings():
-    global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
-    armsY_thr = 0.2
-    squatY_thr = 0.2
-    difficulty = 1
+    global arms_sens, squat_sens, camera #detection_conf, tracking_conf, difficulty
+    arms_sens = 0.2
+    squat_sens = 0.2
+    #difficulty = 1
     camera = 1
 
     data['armsY_threshold'] = 0.2
     data['squatY_threshold'] = 0.2
-    data['difficulty'] = 1
+    #data['difficulty'] = 1
     data['camera'] = 1
     with open("settings.json", "w") as settings_w:
         js.dump(data, settings_w)
         settings_w.close
 
 def apply_settings():
-    global armsY_thr, squatY_thr, difficulty, camera #detection_conf, tracking_conf
+    global arms_sens, squat_sens, camera #detection_conf, tracking_conf, difficulty
     global SYT_scale, DIF_scale, AYT_scale, CAM_scale, cam_state
-    armsY_thr = float(AYT_scale.get()/10)
-    squatY_thr = float(SYT_scale.get()/10)
-    difficulty = int(DIF_scale.get())
+    arms_sens = float(AYT_scale.get()/10)
+    squat_sens = float(SYT_scale.get()/10)
+    #difficulty = int(DIF_scale.get())
     camera = cam_state.get()
 
-    data['armsY_threshold'] = armsY_thr
-    data['squatY_threshold'] = squatY_thr
-    data['difficulty'] = difficulty
+    data['armsY_threshold'] = arms_sens
+    data['squatY_threshold'] = squat_sens
+    #data['difficulty'] = difficulty
     data['camera'] = camera
     with open("settings.json", "w") as settings_w:
         js.dump(data, settings_w)
         settings_w.close
 
 def squatinput(results):
-    global is_jump
-    #getting hips and knees
+    global is_jump, squat_sens
+
     Lhip = results.pose_landmarks.landmark[23]
     Rhip = results.pose_landmarks.landmark[24]
     Lknee = results.pose_landmarks.landmark[25]
     Rknee = results.pose_landmarks.landmark[26]
 
-    #calculating input
-    if (abs(Lhip.y-Lknee.y) < squatY_thr*(1/difficulty) and abs(Rhip.y-Rknee.y) < squatY_thr*(1/difficulty) and is_jump == 0):
+    if (abs(Lhip.y-Lknee.y) < squat_sens/1 and abs(Rhip.y-Rknee.y) < squat_sens/1 and is_jump == 0): #changing that /1 is the key to sensitivity
         kb.press('space')
         is_jump = 1
-    elif (abs(Lhip.y-Lknee.y) > squatY_thr*(1/difficulty) and abs(Rhip.y-Rknee.y) > squatY_thr*(1/difficulty) and is_jump == 1):
+    elif (abs(Lhip.y-Lknee.y) > squat_sens/1 and abs(Rhip.y-Rknee.y) > squat_sens/1 and is_jump == 1):
         kb.release('space')
         is_jump = 0
 
 
 def armsinput(frame, results, win_width, win_height):
-    global is_arms, armsY_thr
-    #getting midpoint
+    global is_arms, arms_sens
+
     nose = results.pose_landmarks.landmark[0]
     cv.line(frame, (int(nose.x*win_width), int(nose.y*win_height)), (int(nose.x*win_width), win_height), (0, 0, 255))
 
-    #getting wrists
     Lwrist = results.pose_landmarks.landmark[15]
     Rwrist = results.pose_landmarks.landmark[16]
-    
-    #calculate keystroke
-    if ((Lwrist.x > nose.x) and (Rwrist.x > nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_thr and is_arms != 2):
+
+    if ((Lwrist.x > nose.x) and (Rwrist.x > nose.x) and abs(Rwrist.y - Lwrist.y) < arms_sens and is_arms != 2):
         kb.press('left')
         is_arms = 2
-    elif ((Lwrist.x < nose.x) and (Rwrist.x < nose.x) and abs(Rwrist.y - Lwrist.y) < armsY_thr and is_arms != 1):
+    elif ((Lwrist.x < nose.x) and (Rwrist.x < nose.x) and abs(Rwrist.y - Lwrist.y) < arms_sens and is_arms != 1):
         kb.press('right')
         is_arms = 1
     elif ((Lwrist.x > nose.x) and (Rwrist.x < nose.x) and is_arms != 0):
@@ -224,10 +220,6 @@ tk.Label(window, text="Created by Naito ;)").pack(side="bottom")
 window.mainloop()
 
 """
-- PAUSE BUTTON/pose --> is_paused Boolean, squat_input and arms_input only if false --> touch corner of the window
 - sensitivity setting --> NORMALIZE SENSITIVITY
 - even tho the landmark is not being detected/shown, it still has a value based on where it thinks it is, i don't want that
-- FAILSAFES
-    - all 4 hand points (for each hand) need to be detected in order to send lateralmov input - ?
-    - if not the whole body is detected, pause automatically (whole body is from head to knees)
 """
