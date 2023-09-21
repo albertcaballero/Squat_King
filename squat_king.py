@@ -119,10 +119,10 @@ def squatinput(results):
     Lknee = results.pose_landmarks.landmark[25]
     Rknee = results.pose_landmarks.landmark[26]
 
-    if (abs(Lhip.y-Lknee.y) < squat_sens/1 and abs(Rhip.y-Rknee.y) < squat_sens/1 and is_jump == 0): #changing that /1 is the key to sensitivity
+    if (abs(Lhip.y-Lknee.y) < squat_sens/3 and abs(Rhip.y-Rknee.y) < squat_sens/3 and is_jump == 0):
         kb.press('space')
         is_jump = 1
-    elif (abs(Lhip.y-Lknee.y) > squat_sens/1 and abs(Rhip.y-Rknee.y) > squat_sens/1 and is_jump == 1):
+    elif (abs(Lhip.y-Lknee.y) > squat_sens/3 and abs(Rhip.y-Rknee.y) > squat_sens/3 and is_jump == 1):
         kb.release('space')
         is_jump = 0
 
