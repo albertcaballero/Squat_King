@@ -13,9 +13,8 @@ Selecting 'Start' will open a new window with the capturing. Close this window w
 - Arms threshold: Change the minimum (vertical) distance the wrists have to be for the program to detect an input.
 - Squat threshold: Change the minimum (vertical) distance the knees and hips have to be for the program to detect an input. 
 	(Both of these will depend on how far away from the camera you are, default is 2 (standing 3 meters away from the camera)).
-- Difficulty: self explanatory, 1 normal, 3 easiest (default is 1).
 - Camera: toggles the visibility of the camera feed. Made with people who don't want to show themselves on camera (vtubers) in mind. The camera will still be used.
 
 ### TIPS
 - Since the program actually emulates a keyboard, once you start the program, have the focus window be the game, or you might start seeing weird behaviours
-- It is impossible for 2 programs to be using the same camera at once, so if you're planning on recording (OBS, etc), dont use camera capture, just capture the Squat King window.
+- It is impossible for 2 programs to be using the same camera at once, so if you're planning on recording (OBS, etc), dont use camera capture, instead just capture the Squat King window.
