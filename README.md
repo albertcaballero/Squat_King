@@ -1,4 +1,4 @@
-# Jumpking
+# Squat King
 ## What is it?
 Squat King is a "mod" (not exactly) for the game [Jump King](https://www.jump-king.com/), it uses camera input to detect people and based on the movements emulate a keyboard press to play the game.
 Since the game only has 3 inputs, it is very simple: squat to jump and hold both arms in one direction or the other to move there.
